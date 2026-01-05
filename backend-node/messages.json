@@ -1,0 +1,30 @@
+{
+  "validation": {
+    "dailyMaxHours": "Maximum 12 hours per day allowed. Please adjust your hours.",
+    "dailyMaxHoursTitle": "Daily Hours Limit Exceeded",
+    "monthlyMinHours": "You must have a minimum of 160 total working hours (including leave and holiday hours) to submit the timesheet.",
+    "monthlyMinHoursTitle": "Insufficient Monthly Hours",
+    "submitDateRestriction": "Timesheet can only be submitted between the 25th and 31st of the current month.",
+    "submitDateRestrictionTitle": "Submission Window Closed"
+  },
+  "ui": {
+    "timesheetSubmitted": "Your timesheet is submitted for approval.",
+    "timesheetSubmittedTitle": "Timesheet Submitted",
+    "saveError": "Could not save entry",
+    "submitError": "Could not submit timesheet",
+    "incompleteEntry": "Please select a Client AND Project",
+    "alreadySubmitted": "This timesheet is already {status}. Cannot submit again.",
+    "alreadySubmittedTitle": "Already Submitted",
+    "cannotSubmit": "Timesheet status is \"{status}\". Only draft timesheets can be submitted.",
+    "cannotSubmitTitle": "Cannot Submit",
+    "timesheetReset": "Timesheet reset to draft. You can now edit and submit again.",
+    "timesheetResetTitle": "Timesheet Reset",
+    "resubmitError": "Could not resubmit: {error}",
+    "resubmitErrorTitle": "Resubmit Error"
+  },
+  "info": {
+    "fillWorkingDays": "Fill 8 hours for each working day",
+    "tipSearchClient": "Tip: Click client dropdown to search"
+  }
+}
+

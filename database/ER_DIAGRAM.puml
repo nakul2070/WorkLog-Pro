@@ -1,0 +1,393 @@
+@startuml Timesheet Management System ER Diagram
+
+!define PK_COLOR #FFE6E6
+!define FK_COLOR #E6F3FF
+!define TABLE_COLOR #F0F0F0
+
+skinparam linetype ortho
+skinparam roundcorner 15
+skinparam shadowing true
+skinparam defaultFontSize 11
+skinparam titleFontSize 16
+skinparam titleFontStyle bold
+skinparam packageStyle rectangle
+skinparam arrowThickness 2
+skinparam arrowColor #333333
+skinparam classBackgroundColor TABLE_COLOR
+skinparam classBorderColor #000000
+skinparam classBorderThickness 2
+
+title Timesheet Management System\nEntity Relationship Diagram\n\nComplete Database Schema with All Relationships
+
+' ============================================
+' CORE ENTITIES - User Management
+' ============================================
+
+entity "USERS" as users PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * employee_id : VARCHAR(50) <<UNIQUE>>
+  * office365_id : VARCHAR(255) <<UNIQUE>>
+  * email : VARCHAR(255) <<UNIQUE>>
+  * name : VARCHAR(255)
+  department : VARCHAR(100)
+  job_title : VARCHAR(100)
+  manager_id : VARCHAR(36) <<FK>>
+  --
+  is_admin : BOOLEAN
+  is_project_manager : BOOLEAN
+  is_active : BOOLEAN
+  --
+  office365_synced_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================
+' CORE ENTITIES - Client & Project Management
+' ============================================
+
+entity "CLIENTS" as clients PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * client_code : VARCHAR(50) <<UNIQUE>>
+  * name : VARCHAR(255)
+  type : ENUM(client|internal)
+  industry : VARCHAR(100)
+  contact_person : VARCHAR(255)
+  contact_email : VARCHAR(255)
+  contact_phone : VARCHAR(50)
+  address : TEXT
+  is_active : BOOLEAN
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "PROJECTS" as projects PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * project_code : VARCHAR(50) <<UNIQUE>>
+  * name : VARCHAR(255)
+  description : TEXT
+  * client_id : VARCHAR(36) <<FK>>
+  * project_manager_id : VARCHAR(36) <<FK>>
+  --
+  * start_date : DATE
+  end_date : DATE
+  estimated_hours : INT
+  status : ENUM(active|on-hold|completed|cancelled)
+  priority : ENUM(low|medium|high|critical)
+  is_billable : BOOLEAN
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "PROJECT_TEAM_MEMBERS" as team_members PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * project_id : VARCHAR(36) <<FK>>
+  * user_id : VARCHAR(36) <<FK>>
+  role : VARCHAR(50)
+  allocated_hours : INT
+  --
+  joined_at : TIMESTAMP
+  left_at : TIMESTAMP
+  is_active : BOOLEAN
+  --
+  .. unique(project_id, user_id) ..
+}
+
+entity "PROJECT_ACCESS_REQUESTS" as access_requests PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * user_id : VARCHAR(36) <<FK>>
+  * request_message : TEXT
+  --
+  status : ENUM(pending|approved|rejected|completed)
+  admin_response : TEXT
+  responded_by : VARCHAR(36) <<FK>>
+  responded_at : TIMESTAMP
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================
+' CORE ENTITIES - Timesheet Management
+' ============================================
+
+entity "TIMESHEETS" as timesheets PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * timesheet_code : VARCHAR(50) <<UNIQUE>>
+  * user_id : VARCHAR(36) <<FK>>
+  * year : INT
+  * month : INT
+  --
+  total_hours : DECIMAL(6,2)
+  total_working_days : INT
+  total_holidays : INT
+  total_leaves : INT
+  status : ENUM(draft|submitted|approved|rejected|revision_required)
+  --
+  submitted_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+  --
+  .. unique(user_id, year, month) ..
+}
+
+entity "TIMESHEET_ENTRIES" as entries PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * timesheet_id : VARCHAR(36) <<FK>>
+  * project_id : VARCHAR(36) <<FK>>
+  * entry_date : DATE
+  * hours : DECIMAL(4,2)
+  task_description : TEXT
+  --
+  is_holiday : BOOLEAN
+  is_leave : BOOLEAN
+  leave_type : VARCHAR(20)
+  is_halfday : TINYINT(1)
+  is_weekend : BOOLEAN
+  --
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "APPROVALS" as approvals PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * timesheet_id : VARCHAR(36) <<FK>>
+  * project_id : VARCHAR(36) <<FK>>
+  * project_manager_id : VARCHAR(36) <<FK>>
+  --
+  status : ENUM(pending|approved|rejected)
+  total_hours : DECIMAL(6,2)
+  comments : TEXT
+  --
+  approved_at : TIMESTAMP
+  rejected_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================
+' CORE ENTITIES - Leave & Holiday Management
+' ============================================
+
+entity "LEAVES" as leaves PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * user_id : VARCHAR(36) <<FK>>
+  * leave_type : VARCHAR(50)
+  * start_date : DATE
+  * end_date : DATE
+  * total_days : INT
+  --
+  reason : TEXT
+  status : ENUM(pending|approved|rejected|cancelled)
+  applied_date : DATE
+  approved_by : VARCHAR(255)
+  --
+  hrone_id : VARCHAR(255)
+  hrone_synced_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "HOLIDAYS" as holidays PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * date : DATE <<UNIQUE>>
+  * title : VARCHAR(255)
+  description : TEXT
+  type : ENUM(public|optional|regional)
+  is_optional : BOOLEAN
+  --
+  hrone_id : VARCHAR(255)
+  hrone_synced_at : TIMESTAMP
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================
+' CORE ENTITIES - System Management
+' ============================================
+
+entity "AUDIT_LOGS" as audit_logs PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  user_id : VARCHAR(36) <<FK>>
+  * action : VARCHAR(50)
+  * entity_type : VARCHAR(50)
+  * entity_id : VARCHAR(36)
+  --
+  old_values : JSON
+  new_values : JSON
+  ip_address : VARCHAR(45)
+  user_agent : TEXT
+  --
+  created_at : TIMESTAMP
+}
+
+entity "SYSTEM_CONFIGURATIONS" as configs PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * category : VARCHAR(100)
+  * config_key : VARCHAR(255) <<UNIQUE>>
+  config_value : TEXT
+  description : TEXT
+  is_secret : BOOLEAN
+  --
+  updated_by : VARCHAR(36) <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "SYNC_LOGS" as sync_logs PK_COLOR {
+  * **id** : VARCHAR(36) <<PK>>
+  --
+  * source : ENUM(office365|hrone)
+  * sync_type : VARCHAR(50)
+  * status : ENUM(success|partial|failed)
+  --
+  records_fetched : INT
+  records_created : INT
+  records_updated : INT
+  records_failed : INT
+  error_message : TEXT
+  sync_details : JSON
+  --
+  started_at : TIMESTAMP
+  completed_at : TIMESTAMP
+  duration_seconds : INT
+}
+
+' ============================================
+' RELATIONSHIPS - User Hierarchy
+' ============================================
+
+users ||--o{ users : "manages\n(manager_id)\nON DELETE SET NULL"
+
+' ============================================
+' RELATIONSHIPS - Client & Project Structure
+' ============================================
+
+clients ||--o{ projects : "has projects\n(client_id)\nON DELETE RESTRICT"
+users ||--o{ projects : "manages as PM\n(project_manager_id)\nON DELETE RESTRICT"
+
+' ============================================
+' RELATIONSHIPS - Project Team Membership
+' ============================================
+
+projects ||--o{ team_members : "has team members\n(project_id)\nON DELETE CASCADE"
+users ||--o{ team_members : "assigned to projects\n(user_id)\nON DELETE CASCADE"
+
+' ============================================
+' RELATIONSHIPS - Project Access Requests
+' ============================================
+
+users ||--o{ access_requests : "requests access\n(user_id)\nON DELETE CASCADE"
+users ||--o{ access_requests : "responds to requests\n(responded_by)\nON DELETE SET NULL"
+
+' ============================================
+' RELATIONSHIPS - Timesheet Submission Flow
+' ============================================
+
+users ||--o{ timesheets : "submits timesheets\n(user_id)\nON DELETE CASCADE"
+timesheets ||--o{ entries : "contains entries\n(timesheet_id)\nON DELETE CASCADE"
+projects ||--o{ entries : "logged time for\n(project_id)\nON DELETE RESTRICT"
+
+' ============================================
+' RELATIONSHIPS - Approval Workflow
+' ============================================
+
+timesheets ||--o{ approvals : "requires approvals\n(timesheet_id)\nON DELETE CASCADE"
+projects ||--o{ approvals : "project approval required\n(project_id)\nON DELETE RESTRICT"
+users ||--o{ approvals : "approves as PM\n(project_manager_id)\nON DELETE RESTRICT"
+
+' ============================================
+' RELATIONSHIPS - Leave Management
+' ============================================
+
+users ||--o{ leaves : "takes leaves\n(user_id)\nON DELETE CASCADE"
+
+' ============================================
+' RELATIONSHIPS - System Management
+' ============================================
+
+users ||--o{ audit_logs : "performs actions\n(user_id)\nON DELETE SET NULL"
+users ||--o{ configs : "updates configurations\n(updated_by)\nON DELETE SET NULL"
+
+' ============================================
+' NOTES & EXPLANATIONS
+' ============================================
+
+note right of users
+  **User Hierarchy:**
+  Self-referencing relationship
+  - A user can have one manager
+  - A manager can manage many users
+  - Optional relationship (manager_id can be NULL)
+end note
+
+note right of team_members
+  **Many-to-Many Relationship:**
+  Junction table connecting
+  Users ↔ Projects
+  - Unique constraint: (project_id, user_id)
+  - Tracks role and allocation
+  - Supports soft deletes (is_active)
+end note
+
+note right of entries
+  **Timesheet Entry Details:**
+  - Multiple entries allowed for
+    same project on same date
+  - Tracks holidays and leaves
+  - Supports half-day leaves
+  - Links timesheets to projects
+end note
+
+note right of approvals
+  **Approval Workflow:**
+  - One approval per project
+    per timesheet
+  - Project Manager approves
+    entries for their projects
+  - Tracks approval status and
+    comments
+end note
+
+note right of holidays
+  **Holiday Management:**
+  - Referenced logically in
+    timesheet entries (is_holiday)
+  - Synced from HRone system
+  - No direct FK relationship
+end note
+
+note right of sync_logs
+  **System Synchronization:**
+  - Tracks external system syncs
+    (Office365, HRone)
+  - No direct FK relationships
+  - Records sync statistics
+    and errors
+end note
+
+note bottom of timesheets
+  **Timesheet Lifecycle:**
+  1. User creates draft timesheet
+  2. User adds entries for projects
+  3. User submits timesheet
+  4. Project Managers approve
+     per project
+  5. Timesheet status updated
+end note
+
+@enduml

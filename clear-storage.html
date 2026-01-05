@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Login Storage</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .success {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        .success.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            text-align: left;
+        }
+        .info strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .info code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .steps {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .steps ol {
+            padding-left: 20px;
+        }
+        .steps li {
+            margin-bottom: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Login Loop Issue</h1>
+        <p>You have an <strong>expired authentication token</strong> stored in your browser. Click the button below to clear it.</p>
+        
+        <div class="info">
+            <strong>What this does:</strong>
+            Removes the expired token from <code>localStorage</code> so you can log in fresh.
+        </div>
+
+        <button onclick="clearStorage()">Clear Expired Token</button>
+        
+        <div class="success" id="successMessage">
+            ✅ Token cleared successfully!<br>
+            <small>You can now close this page and try logging in again.</small>
+        </div>
+
+        <div class="steps">
+            <strong>After clicking the button:</strong>
+            <ol>
+                <li>Go back to <code>http://localhost:3000</code></li>
+                <li>Refresh the page (Ctrl+R or F5)</li>
+                <li>Click "Login with Microsoft" again</li>
+                <li>You should successfully log in!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function clearStorage() {
+            try {
+                // Clear all localStorage items related to auth
+                localStorage.removeItem('authToken');
+                localStorage.clear(); // Clear everything to be safe
+                
+                // Show success message
+                document.getElementById('successMessage').classList.add('show');
+                
+                // Disable the button
+                document.querySelector('button').disabled = true;
+                document.querySelector('button').textContent = '✅ Cleared!';
+                document.querySelector('button').style.background = '#10b981';
+                
+                console.log('✅ localStorage cleared successfully!');
+                
+                // Optional: Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    if (confirm('Token cleared! Open the app now?')) {
+                        window.open('http://localhost:3000', '_blank');
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                alert('Error clearing storage: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+
